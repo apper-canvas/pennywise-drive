@@ -5,9 +5,57 @@ class TransactionService {
     this.transactions = [...transactionsData]
   }
 
-  async getAll() {
+async getAll() {
     await new Promise(resolve => setTimeout(resolve, 300))
     return [...this.transactions].sort((a, b) => new Date(b.date) - new Date(a.date))
+  }
+
+  async filterTransactions(filters) {
+    await new Promise(resolve => setTimeout(resolve, 200))
+    const allTransactions = await this.getAll()
+    
+    return allTransactions.filter(transaction => {
+      // Search term filter
+      if (filters.searchTerm && !transaction.description.toLowerCase()
+          .includes(filters.searchTerm.toLowerCase())) {
+        return false
+      }
+      
+      // Date range filter
+      if (filters.dateRange) {
+        const transactionDate = new Date(transaction.date)
+        if (filters.dateRange.start && transactionDate < new Date(filters.dateRange.start)) {
+          return false
+        }
+        if (filters.dateRange.end && transactionDate > new Date(filters.dateRange.end)) {
+          return false
+        }
+      }
+      
+      // Category filter
+      if (filters.categories && filters.categories.length > 0 && 
+          !filters.categories.includes(transaction.category)) {
+        return false
+      }
+      
+      // Amount range filter
+      if (filters.amountRange) {
+        const amount = Math.abs(transaction.amount)
+        if (filters.amountRange.min && amount < parseFloat(filters.amountRange.min)) {
+          return false
+        }
+        if (filters.amountRange.max && amount > parseFloat(filters.amountRange.max)) {
+          return false
+        }
+      }
+      
+      // Transaction type filter
+      if (filters.type && filters.type !== "all" && transaction.type !== filters.type) {
+        return false
+      }
+      
+      return true
+    })
   }
 
   async getById(id) {

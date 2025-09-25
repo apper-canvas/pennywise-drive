@@ -52,4 +52,15 @@ const CardContent = forwardRef(({ className, ...props }, ref) => {
 
 CardContent.displayName = "CardContent"
 
-export { Card, CardHeader, CardTitle, CardContent }
+const CardDescription = forwardRef(({ className, ...props }, ref) => {
+  return (
+    <p
+      ref={ref}
+      className={cn("text-sm text-gray-600 leading-relaxed", className)}
+      {...props}
+    />
+  )
+})
+CardDescription.displayName = "CardDescription"
+
+export { Card, CardHeader, CardTitle, CardDescription, CardContent }

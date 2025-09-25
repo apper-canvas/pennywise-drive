@@ -8,7 +8,8 @@ const Empty = ({
   description = "Get started by adding your first item",
   icon = "FileText",
   action,
-  actionLabel = "Get Started"
+  actionLabel = "Get Started",
+  showFiltersMessage = false
 }) => {
   return (
     <Card className="p-12 text-center">
@@ -18,7 +19,14 @@ const Empty = ({
         </div>
         <div className="max-w-md">
           <h3 className="text-xl font-semibold text-gray-900 mb-2">{title}</h3>
-          <p className="text-gray-600 leading-relaxed">{description}</p>
+          <p className="text-gray-600 leading-relaxed">
+            {description}
+            {showFiltersMessage && (
+              <span className="block mt-2 text-sm text-gray-500">
+                Try adjusting your filters to see more results.
+              </span>
+            )}
+          </p>
         </div>
         {action && (
           <Button onClick={action} variant="primary" size="lg" className="mt-4">

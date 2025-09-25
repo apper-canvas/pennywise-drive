@@ -1,33 +1,47 @@
-import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import Button from "@/components/atoms/Button"
-import TransactionForm from "@/components/organisms/TransactionForm"
-import CategoryIcon from "@/components/molecules/CategoryIcon"
-import ApperIcon from "@/components/ApperIcon"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/atoms/Card"
-import { formatCurrency, formatDate } from "@/utils/formatters"
-import transactionService from "@/services/api/transactionService"
-import Loading from "@/components/ui/Loading"
-import Error from "@/components/ui/Error"
-import Empty from "@/components/ui/Empty"
-import { toast } from "react-toastify"
-
+import React, { useEffect, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useOutletContext } from "react-router-dom";
+import FilterSidebar from "@/components/organisms/FilterSidebar";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/Card";
+import { toast } from "react-toastify";
+import transactionService from "@/services/api/transactionService";
+import { formatCurrency, formatDate } from "@/utils/formatters";
+import ApperIcon from "@/components/ApperIcon";
+import CategoryIcon from "@/components/molecules/CategoryIcon";
+import Loading from "@/components/ui/Loading";
+import Empty from "@/components/ui/Empty";
+import Error from "@/components/ui/Error";
+import TransactionForm from "@/components/organisms/TransactionForm";
+import Button from "@/components/atoms/Button";
 const Transactions = () => {
+const context = useOutletContext()
+  const { filterSidebarOpen, setFilterSidebarOpen } = context || {}
+  
   const [transactions, setTransactions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [showForm, setShowForm] = useState(false)
   const [editingTransaction, setEditingTransaction] = useState(null)
   const [filter, setFilter] = useState("all")
-
-  const loadTransactions = async () => {
+  const [filters, setFilters] = useState({
+    dateRange: { start: "", end: "" },
+    categories: [],
+    amountRange: { min: "", max: "" },
+    searchTerm: ""
+  })
+  const [categories, setCategories] = useState([])
+const loadTransactions = async () => {
     try {
       setLoading(true)
       setError("")
       
-      await new Promise(resolve => setTimeout(resolve, 300))
       const data = await transactionService.getAll()
       setTransactions(data)
+      
+      // Extract unique categories
+      const uniqueCategories = [...new Set(data.map(t => t.category))].sort()
+      setCategories(uniqueCategories)
+      
     } catch (err) {
       setError("Failed to load transactions")
       console.error("Error loading transactions:", err)
@@ -82,10 +96,58 @@ const Transactions = () => {
   if (loading) return <Loading type="list" />
   if (error) return <Error message={error} onRetry={loadTransactions} />
 
-  const filteredTransactions = transactions.filter(transaction => {
-    if (filter === "all") return true
-    return transaction.type === filter
-  })
+const applyAdvancedFilters = (transactions, filters, basicFilter) => {
+    return transactions.filter(transaction => {
+      // Basic type filter
+      if (basicFilter !== "all" && transaction.type !== basicFilter) {
+        return false
+      }
+      
+      // Search term filter
+      if (filters.searchTerm && !transaction.description.toLowerCase()
+          .includes(filters.searchTerm.toLowerCase())) {
+        return false
+      }
+      
+      // Date range filter
+      if (filters.dateRange.start || filters.dateRange.end) {
+        const transactionDate = new Date(transaction.date)
+        if (filters.dateRange.start && transactionDate < new Date(filters.dateRange.start)) {
+          return false
+        }
+        if (filters.dateRange.end && transactionDate > new Date(filters.dateRange.end)) {
+          return false
+        }
+      }
+      
+      // Category filter
+      if (filters.categories.length > 0 && !filters.categories.includes(transaction.category)) {
+        return false
+      }
+      
+      // Amount range filter
+      const amount = Math.abs(transaction.amount)
+      if (filters.amountRange.min && amount < parseFloat(filters.amountRange.min)) {
+        return false
+      }
+      if (filters.amountRange.max && amount > parseFloat(filters.amountRange.max)) {
+        return false
+      }
+      
+      return true
+    })
+  }
+
+  const filteredTransactions = applyAdvancedFilters(transactions, filters, filter)
+  
+  const getActiveFiltersCount = () => {
+    let count = 0
+    if (filters.searchTerm) count++
+    if (filters.dateRange.start || filters.dateRange.end) count++
+    if (filters.categories.length > 0) count++
+    if (filters.amountRange.min || filters.amountRange.max) count++
+    return count
+  }
 
   const monthlyStats = transactions.reduce((acc, transaction) => {
     const date = new Date(transaction.date)
@@ -109,22 +171,62 @@ const Transactions = () => {
   const currentStats = monthlyStats[currentMonthKey] || { income: 0, expenses: 0 }
 
   return (
-    <div className="space-y-6">
+<div className="space-y-6">
+      {/* Mobile Filter Sidebar */}
+      <FilterSidebar
+        isOpen={filterSidebarOpen && window.innerWidth < 1024}
+        onClose={() => setFilterSidebarOpen(false)}
+        filters={filters}
+        onFiltersChange={setFilters}
+        categories={categories}
+        className="lg:hidden"
+      />
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Transactions</h1>
-          <p className="text-gray-600">Manage your income and expenses</p>
+<h1 className="text-2xl font-bold text-gray-900">
+            Transactions
+            {getActiveFiltersCount() > 0 && (
+              <span className="ml-3 text-sm font-normal text-gray-600">
+                ({filteredTransactions.length} of {transactions.length})
+              </span>
+            )}
+          </h1>
+          <p className="text-gray-600">
+            {getActiveFiltersCount() > 0 ? 
+              `Showing filtered results • ${getActiveFiltersCount()} filter${getActiveFiltersCount() !== 1 ? 's' : ''} active` :
+              'Manage your income and expenses'
+            }
+          </p>
         </div>
         
-        <Button 
-          onClick={() => setShowForm(true)} 
-          variant="primary" 
-          className="w-full sm:w-auto"
-        >
-          <ApperIcon name="Plus" className="h-4 w-4 mr-2" />
-          Add Transaction
-        </Button>
+        <div className="flex items-center space-x-3">
+          {/* Mobile Filter Toggle */}
+          <Button 
+            variant={filterSidebarOpen ? "primary" : "outline"}
+            size="sm"
+            onClick={() => setFilterSidebarOpen(prev => !prev)}
+            className="lg:hidden"
+          >
+            <ApperIcon name="Filter" className="h-4 w-4 mr-2" />
+            Filter
+            {getActiveFiltersCount() > 0 && (
+              <span className="ml-2 px-1.5 py-0.5 text-xs bg-primary-600 text-white rounded-full">
+                {getActiveFiltersCount()}
+              </span>
+            )}
+          </Button>
+          
+          <Button 
+            onClick={() => setShowForm(true)} 
+            variant="primary" 
+            className="w-full sm:w-auto"
+          >
+            <ApperIcon name="Plus" className="h-4 w-4 mr-2" />
+            Add Transaction
+          </Button>
+        </div>
       </div>
 
       {/* Monthly Stats */}

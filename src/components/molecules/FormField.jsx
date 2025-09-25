@@ -17,6 +17,12 @@ const FormField = ({ label, error, className, children, type = "input", ...props
         <Select {...props} className={error ? "border-red-500 focus:ring-red-500" : ""}>
           {children}
         </Select>
+      ) : type === "date" ? (
+        <Input 
+          type="date" 
+          {...props} 
+          className={error ? "border-red-500 focus:ring-red-500" : ""} 
+        />
       ) : (
         <Input {...props} className={error ? "border-red-500 focus:ring-red-500" : ""} />
       )}
