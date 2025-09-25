@@ -47,7 +47,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navigation = [
     { name: "Dashboard", href: "/", icon: "BarChart3" },
     { name: "Transactions", href: "/transactions", icon: "Receipt" },
-    { name: "Budgets", href: "/budgets", icon: "Target" },
+{ name: "Budgets", href: "/budgets", icon: "Target" },
+    { name: "Bank Accounts", href: "/bank-accounts", icon: "CreditCard" },
     { name: "Goals", href: "/goals", icon: "Trophy" },
     { name: "Reports", href: "/reports", icon: "PieChart" }
   ]
