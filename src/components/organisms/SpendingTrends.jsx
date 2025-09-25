@@ -48,13 +48,13 @@ const SpendingTrends = () => {
 
   const monthlyTotals = last6Months.map(month => {
     const monthlyExpenses = transactions
-      .filter(t => {
-        const transactionDate = new Date(t.date)
-        return t.type === "expense" &&
+.filter(t => {
+        const transactionDate = new Date(t.date_c || t.date)
+        return (t.type_c || t.type) === "expense" &&
                transactionDate.getMonth() === month.date.getMonth() &&
                transactionDate.getFullYear() === month.date.getFullYear()
       })
-      .reduce((sum, t) => sum + t.amount, 0)
+      .reduce((sum, t) => sum + (t.amount_c || t.amount), 0)
     
     return monthlyExpenses
   })

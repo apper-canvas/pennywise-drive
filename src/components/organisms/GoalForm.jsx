@@ -8,10 +8,10 @@ import { toast } from "react-toastify"
 
 const GoalForm = ({ onSubmit, onCancel, initialData = null }) => {
   const [formData, setFormData] = useState({
-    name: initialData?.name || "",
-    targetAmount: initialData?.targetAmount || "",
-    currentAmount: initialData?.currentAmount || "",
-    deadline: initialData?.deadline ? new Date(initialData.deadline).toISOString().split('T')[0] : ""
+name: initialData?.name_c || initialData?.name || "",
+    targetAmount: initialData?.target_amount_c || initialData?.targetAmount || "",
+    currentAmount: initialData?.current_amount_c || initialData?.currentAmount || "",
+    deadline: initialData?.deadline_c ? new Date(initialData.deadline_c).toISOString().split('T')[0] : initialData?.deadline ? new Date(initialData.deadline).toISOString().split('T')[0] : ""
   })
 
   const [errors, setErrors] = useState({})
@@ -54,16 +54,16 @@ const GoalForm = ({ onSubmit, onCancel, initialData = null }) => {
     }
 
     const goal = {
-      ...formData,
-      targetAmount: parseFloat(formData.targetAmount),
-      currentAmount: parseFloat(formData.currentAmount || 0),
-      deadline: new Date(formData.deadline).toISOString()
+name_c: formData.name,
+      target_amount_c: parseFloat(formData.targetAmount),
+      current_amount_c: parseFloat(formData.currentAmount || 0),
+      deadline_c: new Date(formData.deadline).toISOString()
     }
 
     onSubmit(goal)
     
     if (!initialData) {
-      setFormData({
+setFormData({
         name: "",
         targetAmount: "",
         currentAmount: "",

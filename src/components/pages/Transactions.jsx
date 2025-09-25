@@ -99,19 +99,19 @@ const loadTransactions = async () => {
 const applyAdvancedFilters = (transactions, filters, basicFilter) => {
     return transactions.filter(transaction => {
       // Basic type filter
-      if (basicFilter !== "all" && transaction.type !== basicFilter) {
+if (basicFilter !== "all" && (transaction.type_c || transaction.type) !== basicFilter) {
         return false
       }
       
       // Search term filter
-      if (filters.searchTerm && !transaction.description.toLowerCase()
+      if (filters.searchTerm && !(transaction.description_c || transaction.description).toLowerCase()
           .includes(filters.searchTerm.toLowerCase())) {
         return false
       }
       
       // Date range filter
       if (filters.dateRange.start || filters.dateRange.end) {
-        const transactionDate = new Date(transaction.date)
+        const transactionDate = new Date(transaction.date_c || transaction.date)
         if (filters.dateRange.start && transactionDate < new Date(filters.dateRange.start)) {
           return false
         }
@@ -121,12 +121,12 @@ const applyAdvancedFilters = (transactions, filters, basicFilter) => {
       }
       
       // Category filter
-      if (filters.categories.length > 0 && !filters.categories.includes(transaction.category)) {
+      if (filters.categories.length > 0 && !filters.categories.includes(transaction.category_c || transaction.category)) {
         return false
       }
       
       // Amount range filter
-      const amount = Math.abs(transaction.amount)
+      const amount = Math.abs(transaction.amount_c || transaction.amount)
       if (filters.amountRange.min && amount < parseFloat(filters.amountRange.min)) {
         return false
       }
@@ -149,18 +149,18 @@ const applyAdvancedFilters = (transactions, filters, basicFilter) => {
     return count
   }
 
-  const monthlyStats = transactions.reduce((acc, transaction) => {
-    const date = new Date(transaction.date)
+const monthlyStats = transactions.reduce((acc, transaction) => {
+    const date = new Date(transaction.date_c || transaction.date)
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
     
     if (!acc[monthKey]) {
       acc[monthKey] = { income: 0, expenses: 0 }
     }
     
-    if (transaction.type === "income") {
-      acc[monthKey].income += transaction.amount
+    if ((transaction.type_c || transaction.type) === "income") {
+      acc[monthKey].income += (transaction.amount_c || transaction.amount)
     } else {
-      acc[monthKey].expenses += transaction.amount
+      acc[monthKey].expenses += (transaction.amount_c || transaction.amount)
     }
     
     return acc
@@ -349,21 +349,21 @@ const applyAdvancedFilters = (transactions, filters, basicFilter) => {
               >
                 <div className="flex items-center space-x-4">
                   <div className={`p-3 rounded-full ${
-                    transaction.type === "income" 
+(transaction.type_c || transaction.type) === "income" 
                       ? "bg-green-100 text-green-600" 
                       : "bg-red-100 text-red-600"
                   }`}>
                     <CategoryIcon 
-                      category={transaction.category} 
+                      category={transaction.category_c || transaction.category} 
                       className="h-5 w-5" 
                     />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-gray-900 truncate">
-                      {transaction.description}
+                      {transaction.description_c || transaction.description}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {transaction.category} • {formatDate(transaction.date)}
+                      {transaction.category_c || transaction.category} • {formatDate(transaction.date_c || transaction.date)}
                     </p>
                   </div>
                 </div>

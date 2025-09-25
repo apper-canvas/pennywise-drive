@@ -37,15 +37,17 @@ const SpendingChart = ({ type = "pie" }) => {
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
   
-  const currentMonthTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date)
-    return t.type === "expense" && 
+const currentMonthTransactions = transactions.filter(t => {
+    const transactionDate = new Date(t.date_c || t.date)
+    return (t.type_c || t.type) === "expense" && 
            transactionDate.getMonth() === currentMonth && 
            transactionDate.getFullYear() === currentYear
   })
 
   const categoryTotals = currentMonthTransactions.reduce((acc, transaction) => {
-    acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount
+    const category = transaction.category_c || transaction.category
+    const amount = transaction.amount_c || transaction.amount
+    acc[category] = (acc[category] || 0) + amount
     return acc
   }, {})
 

@@ -8,11 +8,11 @@ import { toast } from "react-toastify"
 import { getCurrentMonthKey } from "@/utils/formatters"
 
 const BudgetForm = ({ onSubmit, onCancel, initialData = null }) => {
-  const [formData, setFormData] = useState({
-    categoryId: initialData?.categoryId || "",
-    amount: initialData?.amount || "",
-    month: initialData?.month || getCurrentMonthKey().split('-')[1],
-    year: initialData?.year || new Date().getFullYear()
+const [formData, setFormData] = useState({
+    categoryId: initialData?.category_id_c || initialData?.categoryId || "",
+    amount: initialData?.amount_c || initialData?.amount || "",
+    month: initialData?.month_c || initialData?.month || getCurrentMonthKey().split('-')[1],
+    year: initialData?.year_c || initialData?.year || new Date().getFullYear()
   })
 
   const [errors, setErrors] = useState({})
@@ -69,10 +69,11 @@ const BudgetForm = ({ onSubmit, onCancel, initialData = null }) => {
       return
     }
 
-    const budget = {
-      ...formData,
-      amount: parseFloat(formData.amount),
-      year: parseInt(formData.year)
+const budget = {
+      category_id_c: formData.categoryId,
+      amount_c: parseFloat(formData.amount),
+      month_c: formData.month,
+      year_c: parseInt(formData.year)
     }
 
     onSubmit(budget)

@@ -55,27 +55,26 @@ const Dashboard = () => {
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
   
-  const currentMonthTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date)
+const currentMonthTransactions = transactions.filter(t => {
+    const transactionDate = new Date(t.date_c || t.date)
     return transactionDate.getMonth() === currentMonth && 
            transactionDate.getFullYear() === currentYear
   })
 
   const monthlyIncome = currentMonthTransactions
-    .filter(t => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0)
+    .filter(t => (t.type_c || t.type) === "income")
+    .reduce((sum, t) => sum + (t.amount_c || t.amount), 0)
 
   const monthlyExpenses = currentMonthTransactions
-    .filter(t => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0)
+    .filter(t => (t.type_c || t.type) === "expense")
+    .reduce((sum, t) => sum + (t.amount_c || t.amount), 0)
 
   const totalBudget = budgets
-    .filter(b => b.month === String(currentMonth + 1).padStart(2, '0') && b.year === currentYear)
-    .reduce((sum, b) => sum + b.amount, 0)
+    .filter(b => (b.month_c || b.month) === String(currentMonth + 1).padStart(2, '0') && (b.year_c || b.year) === currentYear)
+    .reduce((sum, b) => sum + (b.amount_c || b.amount), 0)
 
-  const totalGoals = goals.reduce((sum, g) => sum + g.targetAmount, 0)
-  const goalProgress = goals.reduce((sum, g) => sum + g.currentAmount, 0)
-
+  const totalGoals = goals.reduce((sum, g) => sum + (g.target_amount_c || g.targetAmount), 0)
+  const goalProgress = goals.reduce((sum, g) => sum + (g.current_amount_c || g.currentAmount), 0)
   const recentTransactions = transactions.slice(0, 5)
 
   return (
@@ -168,30 +167,30 @@ const Dashboard = () => {
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`p-2 rounded-full ${
-                      transaction.type === "income" 
+(transaction.type_c || transaction.type) === "income" 
                         ? "bg-green-100 text-green-600" 
                         : "bg-red-100 text-red-600"
                     }`}>
                       <CategoryIcon 
-                        category={transaction.category} 
+                        category={transaction.category_c || transaction.category} 
                         className="h-4 w-4" 
                       />
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">
-                        {transaction.description}
+                        {transaction.description_c || transaction.description}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {transaction.category} • {formatDate(transaction.date)}
+                        {transaction.category_c || transaction.category} • {formatDate(transaction.date_c || transaction.date)}
                       </p>
                     </div>
                   </div>
                   <span className={`font-semibold ${
-                    transaction.type === "income" 
+                    (transaction.type_c || transaction.type) === "income" 
                       ? "text-green-600" 
                       : "text-red-600"
                   }`}>
-                    {transaction.type === "income" ? "+" : "-"}{formatCurrency(transaction.amount)}
+                    {(transaction.type_c || transaction.type) === "income" ? "+" : "-"}{formatCurrency(transaction.amount_c || transaction.amount)}
                   </span>
                 </motion.div>
               ))}

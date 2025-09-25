@@ -1,60 +1,271 @@
-import budgetsData from "@/services/mockData/budgets.json"
-
 class BudgetService {
   constructor() {
-    this.budgets = [...budgetsData]
+    this.tableName = 'budget_c'
   }
 
   async getAll() {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    return [...this.budgets]
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "category_id_c"}},
+          {"field": {"Name": "amount_c"}},
+          {"field": {"Name": "month_c"}},
+          {"field": {"Name": "year_c"}}
+        ]
+      }
+      
+      const response = await apperClient.fetchRecords(this.tableName, params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      return response.data || []
+    } catch (error) {
+      console.error("Error fetching budgets:", error?.response?.data?.message || error)
+      throw error
+    }
   }
 
   async getById(id) {
-    await new Promise(resolve => setTimeout(resolve, 200))
-    return this.budgets.find(b => b.Id === parseInt(id))
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "category_id_c"}},
+          {"field": {"Name": "amount_c"}},
+          {"field": {"Name": "month_c"}},
+          {"field": {"Name": "year_c"}}
+        ]
+      }
+      
+      const response = await apperClient.getRecordById(this.tableName, parseInt(id), params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      return response.data
+    } catch (error) {
+      console.error(`Error fetching budget ${id}:`, error?.response?.data?.message || error)
+      throw error
+    }
   }
 
   async create(budget) {
-    await new Promise(resolve => setTimeout(resolve, 400))
-    
-    const newBudget = {
-      ...budget,
-      Id: Math.max(...this.budgets.map(b => b.Id)) + 1
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = {
+        records: [{
+          Name: `${budget.category_id_c || budget.categoryId} Budget`,
+          category_id_c: budget.category_id_c || budget.categoryId,
+          amount_c: parseFloat(budget.amount_c || budget.amount),
+          month_c: budget.month_c || budget.month,
+          year_c: parseInt(budget.year_c || budget.year)
+        }]
+      }
+      
+      const response = await apperClient.createRecord(this.tableName, params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      if (response.results) {
+        const successful = response.results.filter(r => r.success)
+        const failed = response.results.filter(r => !r.success)
+        
+        if (failed.length > 0) {
+          console.error(`Failed to create ${failed.length} records:`, failed)
+          throw new Error(failed[0].message || 'Failed to create budget')
+        }
+        
+        return successful[0]?.data
+      }
+      
+      return response.data
+    } catch (error) {
+      console.error("Error creating budget:", error?.response?.data?.message || error)
+      throw error
     }
-    
-    this.budgets.push(newBudget)
-    return { ...newBudget }
   }
 
   async update(id, data) {
-    await new Promise(resolve => setTimeout(resolve, 400))
-    
-    const index = this.budgets.findIndex(b => b.Id === parseInt(id))
-    if (index === -1) throw new Error("Budget not found")
-    
-    this.budgets[index] = { ...this.budgets[index], ...data }
-    return { ...this.budgets[index] }
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          Name: `${data.category_id_c || data.categoryId} Budget`,
+          category_id_c: data.category_id_c || data.categoryId,
+          amount_c: parseFloat(data.amount_c || data.amount),
+          month_c: data.month_c || data.month,
+          year_c: parseInt(data.year_c || data.year)
+        }]
+      }
+      
+      const response = await apperClient.updateRecord(this.tableName, params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      if (response.results) {
+        const successful = response.results.filter(r => r.success)
+        const failed = response.results.filter(r => !r.success)
+        
+        if (failed.length > 0) {
+          console.error(`Failed to update ${failed.length} records:`, failed)
+          throw new Error(failed[0].message || 'Failed to update budget')
+        }
+        
+        return successful[0]?.data
+      }
+      
+      return response.data
+    } catch (error) {
+      console.error("Error updating budget:", error?.response?.data?.message || error)
+      throw error
+    }
   }
 
   async delete(id) {
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
-    const index = this.budgets.findIndex(b => b.Id === parseInt(id))
-    if (index === -1) throw new Error("Budget not found")
-    
-    this.budgets.splice(index, 1)
-    return true
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = { 
+        RecordIds: [parseInt(id)]
+      }
+      
+      const response = await apperClient.deleteRecord(this.tableName, params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      if (response.results) {
+        const failed = response.results.filter(r => !r.success)
+        
+        if (failed.length > 0) {
+          console.error(`Failed to delete ${failed.length} records:`, failed)
+          throw new Error(failed[0].message || 'Failed to delete budget')
+        }
+      }
+      
+      return true
+    } catch (error) {
+      console.error("Error deleting budget:", error?.response?.data?.message || error)
+      throw error
+    }
   }
 
   async getByMonth(month, year) {
-    await new Promise(resolve => setTimeout(resolve, 250))
-    return this.budgets.filter(b => b.month === month && b.year === year)
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "category_id_c"}},
+          {"field": {"Name": "amount_c"}},
+          {"field": {"Name": "month_c"}},
+          {"field": {"Name": "year_c"}}
+        ],
+        where: [
+          {"FieldName": "month_c", "Operator": "ExactMatch", "Values": [month]},
+          {"FieldName": "year_c", "Operator": "ExactMatch", "Values": [year.toString()]}
+        ]
+      }
+      
+      const response = await apperClient.fetchRecords(this.tableName, params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      return response.data || []
+    } catch (error) {
+      console.error("Error fetching budgets by month:", error?.response?.data?.message || error)
+      throw error
+    }
   }
 
   async getByCategory(categoryId) {
-    await new Promise(resolve => setTimeout(resolve, 250))
-    return this.budgets.filter(b => b.categoryId === categoryId)
+    try {
+      const { ApperClient } = window.ApperSDK
+      const apperClient = new ApperClient({
+        apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+        apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+      })
+      
+      const params = {
+        fields: [
+          {"field": {"Name": "Id"}},
+          {"field": {"Name": "Name"}},
+          {"field": {"Name": "category_id_c"}},
+          {"field": {"Name": "amount_c"}},
+          {"field": {"Name": "month_c"}},
+          {"field": {"Name": "year_c"}}
+        ],
+        where: [{
+          "FieldName": "category_id_c",
+          "Operator": "ExactMatch",
+          "Values": [categoryId]
+        }]
+      }
+      
+      const response = await apperClient.fetchRecords(this.tableName, params)
+      
+      if (!response.success) {
+        console.error(response.message)
+        throw new Error(response.message)
+      }
+      
+      return response.data || []
+    } catch (error) {
+      console.error("Error fetching budgets by category:", error?.response?.data?.message || error)
+      throw error
+    }
   }
 }
 

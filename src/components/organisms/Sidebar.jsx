@@ -1,9 +1,48 @@
-import React from "react"
+import React, { useContext } from "react"
 import { NavLink } from "react-router-dom"
 import { motion } from "framer-motion"
+import { useSelector } from 'react-redux'
 import ApperIcon from "@/components/ApperIcon"
+import Button from "@/components/atoms/Button"
 import { cn } from "@/utils/cn"
+import { AuthContext } from '../../App'
 
+const UserSection = () => {
+  const { logout } = useContext(AuthContext)
+  const { user, isAuthenticated } = useSelector((state) => state.user)
+  
+  if (!isAuthenticated || !user) {
+    return null
+  }
+  
+  return (
+    <div className="p-4 border-t border-gray-200 space-y-3">
+      <div className="flex items-center space-x-3 p-3 rounded-xl bg-gray-50">
+        <div className="h-8 w-8 bg-gradient-to-br from-primary-400 to-primary-500 rounded-full flex items-center justify-center">
+          <ApperIcon name="User" className="h-4 w-4 text-white" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate">
+            {user.firstName || user.name || 'User'}
+          </p>
+          <p className="text-xs text-gray-500">
+            {user.emailAddress || 'Premium Account'}
+          </p>
+        </div>
+      </div>
+      
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={logout}
+        className="w-full"
+      >
+        <ApperIcon name="LogOut" className="h-4 w-4 mr-2" />
+        Logout
+      </Button>
+    </div>
+  )
+}
 const Sidebar = ({ isOpen, onClose }) => {
   const navigation = [
     { name: "Dashboard", href: "/", icon: "BarChart3" },
@@ -59,18 +98,8 @@ const Sidebar = ({ isOpen, onClose }) => {
         ))}
       </nav>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-gray-200">
-        <div className="flex items-center space-x-3 p-3 rounded-xl bg-gray-50">
-          <div className="h-8 w-8 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center">
-            <ApperIcon name="User" className="h-4 w-4 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-gray-900 truncate">John Doe</p>
-            <p className="text-xs text-gray-500">Premium Account</p>
-          </div>
-        </div>
-      </div>
+{/* User Section */}
+      <UserSection />
     </div>
   )
 

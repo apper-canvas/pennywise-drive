@@ -50,25 +50,27 @@ const Reports = () => {
   const currentMonth = new Date().getMonth()
   const currentYear = new Date().getFullYear()
   
-  const currentMonthTransactions = transactions.filter(t => {
-    const transactionDate = new Date(t.date)
+const currentMonthTransactions = transactions.filter(t => {
+    const transactionDate = new Date(t.date_c || t.date)
     return transactionDate.getMonth() === currentMonth && 
            transactionDate.getFullYear() === currentYear
   })
 
   const monthlyIncome = currentMonthTransactions
-    .filter(t => t.type === "income")
-    .reduce((sum, t) => sum + t.amount, 0)
+.filter(t => (t.type_c || t.type) === "income")
+    .reduce((sum, t) => sum + (t.amount_c || t.amount), 0)
 
   const monthlyExpenses = currentMonthTransactions
-    .filter(t => t.type === "expense")
+    .filter(t => (t.type_c || t.type) === "expense")
     .reduce((sum, t) => sum + t.amount, 0)
 
   // Category breakdown
   const categoryTotals = currentMonthTransactions
-    .filter(t => t.type === "expense")
+.filter(t => (t.type_c || t.type) === "expense")
     .reduce((acc, transaction) => {
-      acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount
+      const category = transaction.category_c || transaction.category
+      const amount = transaction.amount_c || transaction.amount
+      acc[category] = (acc[category] || 0) + amount
       return acc
     }, {})
 
@@ -85,19 +87,19 @@ const Reports = () => {
   const last6MonthsData = []
   for (let i = 5; i >= 0; i--) {
     const date = new Date(currentYear, currentMonth - i, 1)
-    const monthTransactions = transactions.filter(t => {
-      const transactionDate = new Date(t.date)
+const monthTransactions = transactions.filter(t => {
+      const transactionDate = new Date(t.date_c || t.date)
       return transactionDate.getMonth() === date.getMonth() && 
              transactionDate.getFullYear() === date.getFullYear()
     })
     
     const monthlyIncome = monthTransactions
-      .filter(t => t.type === "income")
-      .reduce((sum, t) => sum + t.amount, 0)
+      .filter(t => (t.type_c || t.type) === "income")
+      .reduce((sum, t) => sum + (t.amount_c || t.amount), 0)
     
     const monthlyExpenses = monthTransactions
-      .filter(t => t.type === "expense")
-      .reduce((sum, t) => sum + t.amount, 0)
+      .filter(t => (t.type_c || t.type) === "expense")
+      .reduce((sum, t) => sum + (t.amount_c || t.amount), 0)
 
     last6MonthsData.push({
       month: getMonthYear(date),

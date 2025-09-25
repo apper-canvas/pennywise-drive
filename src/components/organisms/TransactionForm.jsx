@@ -8,11 +8,11 @@ import { toast } from "react-toastify"
 
 const TransactionForm = ({ onSubmit, onCancel, initialData = null }) => {
   const [formData, setFormData] = useState({
-    amount: initialData?.amount || "",
-    type: initialData?.type || "expense",
-    category: initialData?.category || "",
-    description: initialData?.description || "",
-    date: initialData?.date || new Date().toISOString().split('T')[0]
+amount: initialData?.amount_c || initialData?.amount || "",
+    type: initialData?.type_c || initialData?.type || "expense",
+    category: initialData?.category_c || initialData?.category || "",
+    description: initialData?.description_c || initialData?.description || "",
+    date: initialData?.date_c ? new Date(initialData.date_c).toISOString().split('T')[0] : initialData?.date ? new Date(initialData.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
   })
 
   const [errors, setErrors] = useState({})
@@ -60,17 +60,19 @@ const TransactionForm = ({ onSubmit, onCancel, initialData = null }) => {
       return
     }
 
-    const transaction = {
-      ...formData,
-      amount: parseFloat(formData.amount),
-      date: new Date(formData.date).toISOString()
+const transaction = {
+      amount_c: parseFloat(formData.amount),
+      type_c: formData.type,
+      category_c: formData.category,
+      description_c: formData.description,
+      date_c: new Date(formData.date).toISOString()
     }
 
     onSubmit(transaction)
     
     if (!initialData) {
       setFormData({
-        amount: "",
+amount: "",
         type: "expense",
         category: "",
         description: "",
