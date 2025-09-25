@@ -15,7 +15,7 @@ import Transactions from "@/components/pages/Transactions"
 import Budgets from "@/components/pages/Budgets"
 import Goals from "@/components/pages/Goals"
 import Reports from "@/components/pages/Reports"
-
+import BankAccounts from "@/components/pages/BankAccounts"
 // Create auth context
 export const AuthContext = createContext(null)
 
@@ -134,7 +134,8 @@ function AppContent() {
             <Route path="transactions" element={<Transactions />} />
             <Route path="budgets" element={<Budgets />} />
             <Route path="goals" element={<Goals />} />
-            <Route path="reports" element={<Reports />} />
+<Route path="reports" element={<Reports />} />
+            <Route path="bank-accounts" element={<BankAccounts />} />
           </Route>
         </Routes>
         
