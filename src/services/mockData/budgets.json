@@ -1,0 +1,51 @@
+[
+  {
+    "Id": 1,
+    "categoryId": "Food & Dining",
+    "amount": 400.00,
+    "month": "12",
+    "year": 2024
+  },
+  {
+    "Id": 2,
+    "categoryId": "Transportation",
+    "amount": 150.00,
+    "month": "12", 
+    "year": 2024
+  },
+  {
+    "Id": 3,
+    "categoryId": "Shopping",
+    "amount": 300.00,
+    "month": "12",
+    "year": 2024
+  },
+  {
+    "Id": 4,
+    "categoryId": "Entertainment",
+    "amount": 100.00,
+    "month": "12",
+    "year": 2024
+  },
+  {
+    "Id": 5,
+    "categoryId": "Bills & Utilities",
+    "amount": 250.00,
+    "month": "12",
+    "year": 2024
+  },
+  {
+    "Id": 6,
+    "categoryId": "Health & Medical",
+    "amount": 200.00,
+    "month": "12",
+    "year": 2024
+  },
+  {
+    "Id": 7,
+    "categoryId": "Personal Care",
+    "amount": 80.00,
+    "month": "12",
+    "year": 2024
+  }
+]
